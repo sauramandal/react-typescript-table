@@ -11,39 +11,53 @@ const flattenDeepObject = (
     if (typeof location[key] === "object") {
       flattenDeepObject(location[key], parent + "_" + key, finalLocation);
     } else {
-      finalLocation[parent + "_" + key] = location[key];
+      finalLocation[parent + "_" + key] = { header: key, value: location[key] };
     }
   }
   return finalLocation;
 };
 
-const transformFlattenLocations = (locations: any[]):any[] => {
+const transformFlattenLocations = (locations: any[]): any[] => {
   let draftLocations: any[] = clone(locations);
   let newLocations: any[] = [];
   draftLocations.forEach((location) => {
     let flatObj = flattenDeepObject(location, "location", {});
     newLocations.push(flatObj);
   });
-  console.log("newLocations", newLocations);
+  // console.log("newLocations", newLocations);
   return newLocations;
 };
 
 const App = () => {
-  const [flattnedLocations, setFlattnedLocations] = useState({
-    headers: [] as string[],
-    data: [] as any[],
-  });
+  const [flattnedLocations, setFlattnedLocations] = useState<any []>([]);
   useEffect(() => {
     const draftFlattenedLocations: any[] = transformFlattenLocations(
       personData.results.map(({ location }) => location)
     );
-    console.log(draftFlattenedLocations);
-    setFlattnedLocations({ headers: [], data: draftFlattenedLocations as any });
+    setFlattnedLocations(draftFlattenedLocations as any);
   }, []);
 
-  return <div className="App">
-    <pre>{JSON.stringify(flattnedLocations)}</pre>
-  </div>;
+  return (
+    <div className="App">
+      <table className="table">
+        <thead>
+          <tr>
+            {flattnedLocations[0] && Object.keys(flattnedLocations[0]).map((location, idx) => (
+              <th key={idx}>{(flattnedLocations[0][location]['header'])}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {flattnedLocations && flattnedLocations.map((item, itemIndex) => (
+            <tr key={itemIndex}>
+              {item && Object.keys(item).map((key, keyIdx) => <td key={keyIdx}>{item[key]['value']}</td>)}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {/* <pre>{JSON.stringify(flattnedLocations)}</pre> */}
+    </div>
+  );
 };
 
 export default App;

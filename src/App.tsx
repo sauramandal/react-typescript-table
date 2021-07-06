@@ -46,6 +46,17 @@ const transformFlattenLocations = (locations: any[]): any[] => {
 
 const App = () => {
   const [flattnedLocations, setFlattnedLocations] = useState<any[]>([]);
+  const sortColumn = (sortKey: string) => {
+    const draftData = clone(flattnedLocations);
+    draftData.sort((a: any, b: any) => {
+      const valueA: string = a[sortKey]['value'];
+      const valueB: string = b[sortKey]['value'];
+      if (valueA < valueB) return -1;
+      if (valueA > valueB) return 1;
+      return 0;
+    });
+    setFlattnedLocations(draftData)
+  };
   useEffect(() => {
     const draftFlattenedLocations: any[] = transformFlattenLocations(
       personData.results.map(({ location }) => location)
@@ -59,9 +70,15 @@ const App = () => {
         <thead>
           <tr>
             {flattnedLocations[0] &&
-              Object.keys(flattnedLocations[0] as Location[]).map(
+              Object.keys(flattnedLocations[0] as Location).map(
                 (location: string, idx: number) => (
-                  <th key={idx}>{flattnedLocations[0][location]["header"]}</th>
+                  <th
+                    key={idx}
+                    style={{ cursor: "pointer" }}
+                    onClick={() => sortColumn(location)}
+                  >
+                    {flattnedLocations[0][location]["header"]}
+                  </th>
                 )
               )}
           </tr>
